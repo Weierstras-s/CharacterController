@@ -98,7 +98,10 @@ public class Player : MonoBehaviour {
 
 
     #region API
-    
+    private void Awake() {
+        Screen.SetResolution(1024, 768, false);
+    }
+
     private void Start() {
         self = GetComponent<CharacterController2D>();
         anim = GetComponent<Animator>();
