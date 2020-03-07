@@ -63,8 +63,10 @@ public class Player : MonoBehaviour {
     Animator anim;
     private Vector2 velocity = new Vector2();
     private Vector2 moveVelocity = new Vector2();
+    private Vector2 checkPoint = new Vector2();
 
     //常熟备份
+    private Vector3 scale;
     private float oriAcceleration;
     private void OnCollision(Collider collider) {
         if(collider!=null) Debug.DrawRay(collider.point, collider.normal, Color.white);
@@ -76,16 +78,20 @@ public class Player : MonoBehaviour {
         switch(collider.type) {
             case 1:
                 //传送带
-                moveVelocity.x = -4f;
+                moveVelocity.x = -5f;
                 break;
             case 2:
                 //摩擦力减少
-                self.acceleration = 0.04f;
+                self.acceleration = 0.0f;
                 break;
             case 3:
                 //弹性路面
                 if (Abs(collider.slope) < 89) break;
-                self.velocity.x = -velocity.x * 10;
+                self.velocity.x = -velocity.x * 28;
+                break;
+            case 4:
+                //存档
+                checkPoint = collider.gameObject.transform.position;
                 break;
         }
     }
@@ -101,6 +107,7 @@ public class Player : MonoBehaviour {
         self.slopeVelocity = SlopeVelocity;
         self.onCollision = OnCollision;
         //常数备份
+        scale = transform.localScale;
         oriAcceleration = self.acceleration;
     }
 
@@ -116,8 +123,8 @@ public class Player : MonoBehaviour {
 
         //动画控制1
         int animHash;
-        if (inputVelocity.x > 0) transform.localScale = new Vector3(5, 5, 1);
-        else if (inputVelocity.x < 0) transform.localScale = new Vector3(-5, 5, 1);
+        if (inputVelocity.x > 0) transform.localScale = scale;
+        else if (inputVelocity.x < 0) transform.localScale = Vector2.Scale(scale, new Vector3(-1, 1, 1));
         if (self.isGrounded) {
             if (inputVelocity.x != 0) animHash = Animator.StringToHash("Run");
             else animHash = Animator.StringToHash("Idle");
@@ -151,6 +158,12 @@ public class Player : MonoBehaviour {
         if (self.isCrouching) animHash = Animator.StringToHash("Crouch");
         //播放动画
         anim.Play(animHash);
+
+        //重新开始
+        if(Input.GetKeyDown(KeyCode.R)){
+            self.velocity = new Vector2(0, 0);
+            transform.position = new Vector3(checkPoint.x, checkPoint.y + 2, -5);
+        }
     }
 
     #endregion
